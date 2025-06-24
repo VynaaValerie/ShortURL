@@ -2,23 +2,42 @@ document.addEventListener('DOMContentLoaded', () => {
   const originalUrlInput = document.getElementById('originalUrl');
   const shortenBtn = document.getElementById('shortenBtn');
   const resultDiv = document.getElementById('result');
-  const shortUrlLink = document.getElementById('shortUrl');
+  const shortUrlInput = document.getElementById('shortUrl');
   const copyBtn = document.getElementById('copyBtn');
+  const qrBtn = document.getElementById('qrBtn');
+  const qrModal = document.getElementById('qrModal');
+  const closeModal = document.querySelector('.close');
+  const downloadPNG = document.getElementById('downloadPNG');
+  const downloadSVG = document.getElementById('downloadSVG');
+  const btnText = document.getElementById('btnText');
+  const spinner = document.getElementById('spinner');
 
   shortenBtn.addEventListener('click', shortenUrl);
   copyBtn.addEventListener('click', copyToClipboard);
+  qrBtn.addEventListener('click', showQRModal);
+  closeModal.addEventListener('click', hideQRModal);
+  
+  // Close modal when clicking outside
+  window.addEventListener('click', (event) => {
+    if (event.target === qrModal) {
+      hideQRModal();
+    }
+  });
 
   async function shortenUrl() {
     const url = originalUrlInput.value.trim();
     
     if (!url) {
       alert('Please enter a URL');
+      originalUrlInput.focus();
       return;
     }
 
     try {
+      // Show loading state
       shortenBtn.disabled = true;
-      shortenBtn.textContent = 'Shortening...';
+      btnText.textContent = 'Shortening...';
+      spinner.style.display = 'inline-block';
 
       const response = await fetch('/api/shorten', {
         method: 'POST',
@@ -31,9 +50,14 @@ document.addEventListener('DOMContentLoaded', () => {
       const data = await response.json();
 
       if (response.ok) {
-        shortUrlLink.href = data.shortUrl;
-        shortUrlLink.textContent = data.shortUrl;
+        shortUrlInput.value = data.shortUrl;
         resultDiv.classList.remove('hidden');
+        originalUrlInput.value = ''; // Clear input after successful shortening
+        
+        // Scroll to result if on mobile
+        if (window.innerWidth < 768) {
+          resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
       } else {
         alert(data.error || 'Failed to shorten URL');
       }
@@ -41,22 +65,97 @@ document.addEventListener('DOMContentLoaded', () => {
       console.error('Error:', error);
       alert('An error occurred while shortening the URL');
     } finally {
+      // Reset button state
       shortenBtn.disabled = false;
-      shortenBtn.textContent = 'Shorten URL';
+      btnText.textContent = 'Shorten URL';
+      spinner.style.display = 'none';
     }
   }
 
   function copyToClipboard() {
-    const textToCopy = shortUrlLink.href;
+    const textToCopy = shortUrlInput.value;
     navigator.clipboard.writeText(textToCopy)
       .then(() => {
-        copyBtn.textContent = 'Copied!';
+        // Change button to show success
+        copyBtn.innerHTML = '<i class="fas fa-check"></i><span>Copied!</span>';
         setTimeout(() => {
-          copyBtn.textContent = 'Copy';
+          copyBtn.innerHTML = '<i class="far fa-copy"></i><span>Copy</span>';
         }, 2000);
       })
       .catch(err => {
         console.error('Failed to copy: ', err);
       });
+  }
+
+  function showQRModal() {
+    if (!shortUrlInput.value) {
+      alert('Please shorten a URL first');
+      return;
+    }
+    
+    const qrCodeDiv = document.getElementById('qrCode');
+    qrCodeDiv.innerHTML = '';
+    
+    QRCode.toCanvas(qrCodeDiv, shortUrlInput.value, {
+      width: 200,
+      margin: 2,
+      color: {
+        dark: '#000000',
+        light: '#ffffff'
+      }
+    }, (error) => {
+      if (error) console.error(error);
+    });
+    
+    qrModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function hideQRModal() {
+    qrModal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+  }
+
+  // Handle download buttons
+  downloadPNG.addEventListener('click', () => downloadQR('png'));
+  downloadSVG.addEventListener('click', () => downloadQR('svg'));
+
+  function downloadQR(format) {
+    if (!shortUrlInput.value) return;
+    
+    const url = shortUrlInput.value;
+    const filename = `qr-code.${format}`;
+    
+    if (format === 'png') {
+      QRCode.toDataURL(url, {
+        width: 500,
+        margin: 2
+      }, (err, url) => {
+        if (err) return console.error(err);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    } else if (format === 'svg') {
+      QRCode.toString(url, {
+        type: 'svg',
+        width: 500,
+        margin: 2
+      }, (err, svg) => {
+        if (err) return console.error(err);
+        
+        const blob = new Blob([svg], { type: 'image/svg+xml' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      });
+    }
   }
 });

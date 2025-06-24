@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Documentation | ShortURL Tool</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .documentation {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    
+    .endpoint {
+      background-color: #f8f9fa;
+      padding: 1.5rem;
+      border-radius: 8px;
+      margin-bottom: 2rem;
+      border-left: 4px solid var(--primary-color);
+    }
+    
+    .method {
+      display: inline-block;
+      padding: 0.3rem 0.8rem;
+      background-color: var(--primary-color);
+      color: white;
+      border-radius: 4px;
+      font-weight: bold;
+      margin-right: 0.8rem;
+      font-family: monospace;
+    }
+    
+    pre {
+      background-color: #2d3748;
+      color: #e2e8f0;
+      padding: 1rem;
+      border-radius: 6px;
+      overflow-x: auto;
+      font-family: 'Courier New', Courier, monospace;
+      margin: 1rem 0;
+      tab-size: 2;
+    }
+    
+    code {
+      font-family: 'Courier New', Courier, monospace;
+      background-color: #edf2f7;
+      padding: 0.2rem 0.4rem;
+      border-radius: 3px;
+      color: #2d3748;
+    }
+    
+    .response-codes {
+      margin-top: 1.5rem;
+    }
+    
+    .response-codes h3 {
+      margin-bottom: 0.8rem;
+    }
+    
+    .response-code {
+      display: flex;
+      margin-bottom: 0.5rem;
+    }
+    
+    .code {
+      width: 80px;
+      font-weight: bold;
+    }
+    
+    .get {
+      background-color: #61affe;
+    }
+    
+    .post {
+      background-color: #49cc90;
+    }
+    
+    .put {
+      background-color: #fca130;
+    }
+    
+    .delete {
+      background-color: #f93e3e;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1><i class="fas fa-book"></i> API Documentation</h1>
+      <p class="subtitle">Integrate ShortURL with your applications</p>
+    </header>
+    
+    <main class="documentation">
+      <div class="endpoint">
+        <h2>Shorten a URL</h2>
+        <p>Create a short URL from a long URL</p>
+        
+        <div class="method post">POST</div>
+        <code>/api/shorten</code>
+        
+        <h3>Request</h3>
+        <pre>{
+  "originalUrl": "https://example.com/very/long/url/to/be/shortened"
+}</pre>
+        
+        <h3>Response</h3>
+        <pre>{
+  "originalUrl": "https://example.com/very/long/url/to/be/shortened",
+  "shortUrl": "https://yourdomain.com/abc123"
+}</pre>
+        
+        <div class="response-codes">
+          <h3>Response Codes</h3>
+          <div class="response-code">
+            <div class="code">200 OK</div>
+            <div>URL shortened successfully</div>
+          </div>
+          <div class="response-code">
+            <div class="code">400 Bad Request</div>
+            <div>Missing or invalid URL</div>
+          </div>
+          <div class="response-code">
+            <div class="code">500 Server Error</div>
+            <div>Internal server error</div>
+          </div>
+        </div>
+      </div>
+      
+      <div class="endpoint">
+        <h2>Redirect Short URL</h2>
+        <p>Access a short URL to be redirected to the original URL</p>
+        
+        <div class="method get">GET</div>
+        <code>/{shortCode}</code>
+        
+        <h3>Example</h3>
+        <pre>GET https://yourdomain.com/abc123</pre>
+        
+        <div class="response-codes">
+          <h3>Response Codes</h3>
+          <div class="response-code">
+            <div class="code">301 Moved</div>
+            <div>Redirect to original URL</div>
+          </div>
+          <div class="response-code">
+            <div class="code">404 Not Found</div>
+            <div>Short URL not found</div>
+          </div>
+        </div>
+      </div>
+    </main>
+    
+    <footer>
+      <div class="links">
+        <a href="/"><i class="fas fa-arrow-left"></i> Back to Home</a>
+      </div>
+    </footer>
+  </div>
+</body>
+</html>
