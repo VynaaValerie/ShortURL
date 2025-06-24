@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const copyBtn = document.getElementById('copyBtn');
   const qrBtn = document.getElementById('qrBtn');
   const qrModal = document.getElementById('qrModal');
-  const closeModal = document.querySelector('.close');
+  const closeBtn = document.querySelector('.close-btn');
   const downloadPNG = document.getElementById('downloadPNG');
   const downloadSVG = document.getElementById('downloadSVG');
   const btnText = document.getElementById('btnText');
@@ -15,11 +15,18 @@ document.addEventListener('DOMContentLoaded', () => {
   shortenBtn.addEventListener('click', shortenUrl);
   copyBtn.addEventListener('click', copyToClipboard);
   qrBtn.addEventListener('click', showQRModal);
-  closeModal.addEventListener('click', hideQRModal);
+  closeBtn.addEventListener('click', hideQRModal);
   
   // Close modal when clicking outside
   window.addEventListener('click', (event) => {
     if (event.target === qrModal) {
+      hideQRModal();
+    }
+  });
+
+  // Close modal with Escape key
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && !qrModal.classList.contains('hidden')) {
       hideQRModal();
     }
   });
@@ -107,12 +114,13 @@ document.addEventListener('DOMContentLoaded', () => {
       if (error) console.error(error);
     });
     
-    qrModal.classList.remove('hidden');
+    // Show modal with animation
+    qrModal.classList.add('show');
     document.body.style.overflow = 'hidden';
   }
 
   function hideQRModal() {
-    qrModal.classList.add('hidden');
+    qrModal.classList.remove('show');
     document.body.style.overflow = 'auto';
   }
 
